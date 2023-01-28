@@ -1,8 +1,12 @@
 {
   "books": [
     {
-      "title": "harry potter",
-      "id": 3
+      "title": "the torah",
+      "id": 7
+    },
+    {
+      "title": "The bible",
+      "id": 8
     }
   ]
 }
