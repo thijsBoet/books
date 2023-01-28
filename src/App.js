@@ -1,42 +1,53 @@
 import { useState, useEffect } from 'react';
-import { BookCreate, BookList } from './components';
-import { generateRandomId } from './utils';
-import { bookData } from './data';
+
+
+import BookCreate from './components/BookCreate';
+import BookList from './components/BookList';
+
 import axios from 'axios';
 
-const App = () => {
-	const [books, setBooks] = useState(bookData);
-	// useEffect(() => {
-	// 	const response = axios.get('http://localhost:3001/books')
-	// 	setBooks(response.data)
-	// }, [books])
-	
+import { BASE_URL } from './constants';
 
+function App() {
+	const [books, setBooks] = useState([]);
 
-	const createBook = title => {
-		const updatedBooks = [...books, { id: generateRandomId(), title }];
-		setBooks(updatedBooks);
+	const fetchBooks = async () => {
+		const response = await axios.get(`${BASE_URL}/books`);
+
+		setBooks(response.data);
 	};
 
-	const editBookById = (id, title) => {
-		const updatedBooks = books.map(book =>
-			book.id === id ? { ...book, title } : book
-		);
-		setBooks(updatedBooks);
+	useEffect(() => {
+		fetchBooks();
+	}, []);
+
+  const editBookById = async (id, newTitle) => {
+    const response = await axios.patch(`${BASE_URL}/books/${id}`, { title: newTitle });
+    const updatedBooks = books.map(book => book.id === id && {...book, ...response.data});
+
+    setBooks(updatedBooks);
 	};
 
-	const deleteBookById = id => {
+  const deleteBookById = async id => {
+    await axios.delete(`${BASE_URL}/books/${id}`);
 		const updatedBooks = books.filter(book => book.id !== id);
+
 		setBooks(updatedBooks);
+	};
+
+	const createBook = async title => {
+		const response = await axios.post(`${BASE_URL}/books`, { title });
+
+		setBooks([...books, response.data]);
 	};
 
 	return (
 		<div className='app'>
 			<h1>Reading List</h1>
-			<BookList books={books} onDelete={deleteBookById} onEdit={editBookById} />
+			<BookList onEdit={editBookById} books={books} onDelete={deleteBookById} />
 			<BookCreate onCreate={createBook} />
 		</div>
 	);
-};
+}
 
 export default App;
